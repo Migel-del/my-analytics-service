@@ -1,0 +1,17 @@
+# Prefect project configuration file
+name: my-analytics-service
+python_version: "3.12"
+
+pull:
+  - prefect.deployments.steps.git_clone:
+      repository: https://github.com/Migel-del/my-analytics-service.git
+      branch: main
+
+deployments:
+  - name: data-stream-deployment
+    entrypoint: stream_deploy.py:main_stream_flow
+    work_pool:
+      name: wilz
+      work_queue_name: default
+      job_variables:
+        image: prefecthq/prefect-client:3-latest

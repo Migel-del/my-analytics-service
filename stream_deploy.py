@@ -25,8 +25,5 @@ async def main_stream_flow():
 if __name__ == "__main__":
     main_stream_flow.deploy(
         name="data-stream-deployment",
-        work_pool_name="wilz",
-        # Указываем Prefect брать код из вашего репозитория GitHub
-        image="prefecthq/prefect-client:3-latest",
-        storage="https://github.com/Migel-del/my-analytics-service.git"
+        work_pool_name="wilz"
     )
