@@ -23,7 +23,12 @@ async def main_stream_flow():
 
 
 if __name__ == "__main__":
-    main_stream_flow.deploy(
+    # Используем .from_source для привязки удаленного репозитория GitHub
+    main_stream_flow.from_source(
+        source="https://github.com/Migel-del/my-analytics-service.git",
+        entrypoint="stream_deploy.py:main_stream_flow"
+    ).deploy(
         name="data-stream-deployment",
-        work_pool_name="wilz"
+        work_pool_name="wilz",
+        image="prefecthq/prefect-client:3-latest"
     )
