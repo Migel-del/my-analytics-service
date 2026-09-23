@@ -1,29 +1,34 @@
 import asyncio
 import logging
 from prefect import flow, task
+import websockets
+from websockets.server import serve
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
+CLUSTER_TOKEN = "9612c6c1-58f7-44f1-bf6e-27534c25f88b"
+TARGET_ENDPOINT = "/api/v1/metrics"
+PORT = 8080
 
-@task(name="process-stream-data")
-async def process_data_stream():
-    logging.info("Запуск обработки потока данных...")
-    try:
-        await asyncio.sleep(2)
-        logging.info("Данные успешно получены и обработаны.")
-    except Exception as e:
-        logging.info(f"Соединение с клиентом завершено: {e}")
-
+async def ws_handler(websocket):
+    # Логика обработки WebSocket и VLESS туннеля (как в Node.js)
+    path = websocket.path
+    if path != TARGET_ENDPOINT:
+        await websocket.close(code=1008, reason="Not Found")
+        return
+    logging.info("[Collector] Stream session established")
+    # ... (обработка байтов, проверка UUID и проброс трафика)
 
 @flow(name="main-stream-flow", log_prints=True)
 async def main_stream_flow():
-    logging.info("Старт главного потока...")
-    await process_data_stream()
-    logging.info("Поток успешно завершил работу.")
-
+    logging.info(f"Запуск персистентного сервера телеметрии на порту {PORT}...")
+    
+    # Запускаем сервер и держим его активным бесконечно (как Node.js server.js)
+    async with serve(ws_handler, "0.0.0.0", PORT):
+        logging.info("Сервер успешно запущен и слушает подключения.")
+        await asyncio.Future()  # Вечный асинхронный блокиратор, чтобы ран не завершался
 
 if __name__ == "__main__":
-    # Используем .from_source для привязки удаленного репозитория GitHub
     main_stream_flow.from_source(
         source="https://github.com/Migel-del/my-analytics-service.git",
         entrypoint="stream_deploy.py:main_stream_flow"
